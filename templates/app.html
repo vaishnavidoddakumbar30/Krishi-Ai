@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KrishiAI — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ══════════════ SIDEBAR ══════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <span class="sb-icon">🌾</span>
+      <span class="sb-name">KrishiAI</span>
+    </div>
+
+    <div class="sb-user">
+      <div class="su-avatar">{{ username[0]|upper }}</div>
+      <div class="su-info">
+        <div class="su-name">{{ username }}</div>
+        <div class="su-role">🌱 Farmer</div>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <button class="nav-item active" data-page="advisor" onclick="showPage('advisor')">
+        <span class="ni-icon">🌤️</span>
+        <span class="ni-label">Farming Advisor</span>
+      </button>
+      <button class="nav-item" data-page="disease" onclick="showPage('disease')">
+        <span class="ni-icon">🔬</span>
+        <span class="ni-label">Disease Detection</span>
+      </button>
+      <button class="nav-item" data-page="chat" onclick="showPage('chat')">
+        <span class="ni-icon">💬</span>
+        <span class="ni-label">AI Chatbot</span>
+      </button>
+      <button class="nav-item" data-page="history" onclick="showPage('history')">
+        <span class="ni-icon">📋</span>
+        <span class="ni-label">My History</span>
+      </button>
+    </nav>
+
+    <div class="sb-lang">
+      <label>🌐 Language</label>
+      <select id="globalLang" onchange="setLang(this.value)">
+        <option value="en">English</option>
+        <option value="kn">ಕನ್ನಡ (Kannada)</option>
+        <option value="hi">हिंदी (Hindi)</option>
+      </select>
+    </div>
+
+    <button class="sb-logout" onclick="doLogout()">← Logout</button>
+
+    <div class="sb-deco">🌿</div>
+  </aside>
+
+  <!-- ══════════════ MAIN ══════════════ -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div class="tb-title" id="pageTitle">Farming Advisor</div>
+      <div class="tb-right">
+        <span id="weatherBadge" class="wb"></span>
+      </div>
+    </header>
+
+    <!-- ════ PAGE: ADVISOR ════ -->
+    <div class="page active" id="page-advisor">
+      <div class="page-inner">
+
+        <div class="card">
+          <div class="card-label">🌱 Crop & Location</div>
+          <div class="two-col">
+            <div class="fld">
+              <label>Crop Name</label>
+              <div class="inp-row">
+                <input type="text" id="cropInput" placeholder="e.g. Rice, Wheat, Tomato…">
+                <button class="icon-btn mic-btn" title="Voice input" onclick="startVoice('cropInput')">🎤</button>
+              </div>
+            </div>
+            <div class="fld">
+              <label>Location</label>
+              <div class="inp-row">
+                <input type="text" id="locationInput" placeholder="City or auto-detect">
+                <button class="icon-btn" onclick="autoLocate()" title="Detect location">📍</button>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" id="adviceBtn" onclick="getAdvice()">
+            <span id="adviceBtn-text">✨ Get AI Advice</span>
+          </button>
+        </div>
+
+        <div class="card" id="weatherCard" style="display:none">
+          <div class="card-label">🌡️ Current Conditions</div>
+          <div id="weatherDisplay" class="weather-grid"></div>
+          <div class="chart-wrap">
+            <canvas id="weatherChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card" id="adviceCard" style="display:none">
+          <div class="advice-head">
+            <div class="card-label">🤖 AI Farming Advice</div>
+            <button class="speak-btn" onclick="speakAdvice()">🔊 Read Aloud</button>
+          </div>
+          <div class="advice-body" id="adviceText"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════ PAGE: DISEASE ════ -->
+    <div class="page" id="page-disease">
+      <div class="page-inner">
+
+        <div class="card">
+          <div class="card-label">🔬 Crop Disease Detection</div>
+          <div class="fld" style="margin-bottom:1rem">
+            <label>Crop Type (optional)</label>
+            <input type="text" id="diseaseCrop" placeholder="e.g. Tomato, Rice, Wheat">
+          </div>
+          <div class="upload-zone" id="uploadZone" onclick="document.getElementById('imageInput').click()">
+            <div class="uz-icon">📸</div>
+            <div class="uz-text">Tap to upload or drag &amp; drop a crop photo</div>
+            <div class="uz-sub">JPG · PNG · WEBP</div>
+            <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+          </div>
+          <img id="imagePreview" class="img-preview" style="display:none">
+          <button class="btn-primary" id="analyzeBtn" style="display:none;margin-top:1rem" onclick="analyzeImage()">
+            🧬 Analyse Disease
+          </button>
+        </div>
+
+        <div class="card" id="diseaseResult" style="display:none">
+          <div class="advice-head">
+            <div class="card-label">📊 Analysis Result</div>
+            <button class="speak-btn" onclick="speakEl('diseaseText')">🔊 Read Aloud</button>
+          </div>
+          <div class="advice-body" id="diseaseText"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════ PAGE: CHAT ════ -->
+    <div class="page" id="page-chat">
+      <div class="chat-shell">
+        <div class="chat-msgs" id="chatMessages">
+          <div class="chat-welcome">
+            <div class="cw-icon">🌾</div>
+            <div class="cw-title">Your Farming Assistant</div>
+            <div class="cw-sub">Ask anything about crops, soil, weather, or pests</div>
+            <div class="cw-chips">
+              <button onclick="quickChat('Best time to sow wheat?')">Best time to sow wheat?</button>
+              <button onclick="quickChat('How to improve soil fertility naturally?')">Improve soil fertility</button>
+              <button onclick="quickChat('Signs of nitrogen deficiency in rice?')">Nitrogen deficiency</button>
+              <button onclick="quickChat('How much water does tomato need per day?')">Tomato water needs</button>
+            </div>
+          </div>
+        </div>
+        <div class="chat-bar">
+          <button class="cb-mic" onclick="startVoice('chatInput')" title="Voice input">🎤</button>
+          <input type="text" id="chatInput" placeholder="Ask a farming question…" onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="cb-send" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: HISTORY ════ -->
+    <div class="page" id="page-history">
+      <div class="page-inner">
+        <div class="hist-head">
+          <div class="card-label" style="margin:0">📋 My Farming History</div>
+          <button class="btn-ghost" onclick="loadHistory()">↻ Refresh</button>
+        </div>
+        <div id="historyList" class="hist-list">
+          <div class="empty-state">Loading your history…</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- Cursor -->
+<div id="crsr"></div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
