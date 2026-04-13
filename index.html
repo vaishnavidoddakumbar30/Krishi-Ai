@@ -3,448 +3,201 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KrishiAI — Grow Smarter</title>
+<title>KrishiAI — Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-:root {
-  --soil:   #120d06;
-  --bark:   #2a1c0c;
-  --moss:   #2a3818;
-  --fern:   #3d5828;
-  --sage:   #6b7f50;
-  --wheat:  #c4923a;
-  --amber:  #d4a557;
-  --pollen: #e8c070;
-  --cream:  #f0e8d5;
-  --border: rgba(196,146,58,0.22);
-  --mist:   rgba(240,232,213,0.05);
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; }
-body {
-  font-family: 'Jost', sans-serif;
-  background: var(--soil);
-  color: var(--cream);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* ── WORLD BG ── */
-.world { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-.world::before {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse 110% 80% at 10% 55%, rgba(42,56,24,0.65) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 90% at 88% 15%, rgba(196,146,58,0.1) 0%, transparent 50%),
-    radial-gradient(ellipse 50% 50% at 50% 100%, rgba(10,7,2,0.9) 0%, transparent 55%),
-    linear-gradient(155deg, #120d06 0%, #261808 40%, #1a2510 70%, #0e0a04 100%);
-}
-.grain-layer {
-  position: absolute; inset: -60%; width: 220%; height: 220%;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E");
-  animation: grainDrift 8s linear infinite;
-  mix-blend-mode: soft-light;
-  opacity: 0.6;
-}
-@keyframes grainDrift { 0%{transform:translate(0,0)} 100%{transform:translate(3%,3%)} }
-
-/* Concentric rings */
-.ring {
-  position: absolute; border-radius: 50%;
-  border: 1px solid rgba(196,146,58,0.07);
-  animation: ringPulse 14s ease-in-out infinite;
-}
-.ring:nth-child(1){width:500px;height:500px;top:-180px;left:-180px;animation-delay:0s;}
-.ring:nth-child(2){width:350px;height:350px;top:-100px;left:-100px;border-color:rgba(107,127,80,0.09);animation-delay:-5s;}
-.ring:nth-child(3){width:750px;height:750px;bottom:-250px;right:-250px;animation-delay:-9s;}
-.ring:nth-child(4){width:180px;height:180px;bottom:12%;right:18%;border-color:rgba(196,146,58,0.1);animation-delay:-3s;}
-@keyframes ringPulse { 0%,100%{transform:scale(1);opacity:.8} 50%{transform:scale(1.06);opacity:1} }
-
-/* Light shafts */
-.shaft {
-  position: absolute; top: 0;
-  width: 1px; height: 100vh;
-  background: linear-gradient(180deg, rgba(196,146,58,0.18) 0%, transparent 65%);
-  transform-origin: top;
-  animation: shaftSway 18s ease-in-out infinite;
-}
-.shaft:nth-child(1){ left: 18%; }
-.shaft:nth-child(2){ left: 40%; animation-delay:-6s; opacity:.5; }
-.shaft:nth-child(3){ left: 72%; animation-delay:-12s; opacity:.35; }
-@keyframes shaftSway { 0%,100%{transform:scaleX(1) rotate(-1.5deg)} 50%{transform:scaleX(7) rotate(1.5deg)} }
-
-/* Leaf silhouettes */
-.lf { position: absolute; font-size: 14rem; opacity: 0; filter: blur(3px);
-  animation: lfFloat 22s ease-in-out infinite; pointer-events: none; user-select: none; }
-.lf.a { top:-4%; left:-2%; }
-.lf.b { bottom:-4%; right:-2%; font-size:22rem; animation-delay:-8s; }
-.lf.c { top:42%; left:1%; font-size:9rem; animation-delay:-16s; }
-@keyframes lfFloat {
-  0%{opacity:0;transform:translateY(18px) rotate(-4deg)}
-  20%{opacity:.045} 80%{opacity:.045}
-  100%{opacity:0;transform:translateY(-18px) rotate(4deg)}
-}
-
-/* ── STAGE ── */
-.stage {
-  position: relative; z-index: 1;
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: 1.15fr 440px;
-}
-
-/* ── HERO ── */
-.hero {
-  display: flex; flex-direction: column; justify-content: center;
-  padding: 5rem 3rem 5rem 8vw;
-  position: relative;
-}
-.eyebrow {
-  display: flex; align-items: center; gap: .7rem;
-  margin-bottom: 2.5rem;
-  opacity: 0; animation: riseIn .8s .2s ease forwards;
-}
-.eyebrow-line { width: 36px; height: 1px; background: var(--amber); }
-.eyebrow-txt {
-  font-size: .68rem; font-weight: 500;
-  letter-spacing: .25em; text-transform: uppercase; color: var(--amber);
-}
-.hero-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(3.8rem, 7.5vw, 7rem);
-  font-weight: 700; line-height: .95;
-  color: var(--cream);
-  opacity: 0; animation: riseIn .9s .4s ease forwards;
-}
-.hero-title em { font-style: italic; color: var(--amber); }
-.hero-tagline {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(1.1rem, 2.2vw, 1.7rem);
-  font-weight: 400; font-style: italic;
-  color: rgba(240,232,213,.4);
-  margin: .4rem 0 2rem;
-  opacity: 0; animation: riseIn .9s .55s ease forwards;
-}
-.divider {
-  width: 70px; height: 1px;
-  background: linear-gradient(90deg, var(--wheat), transparent);
-  margin-bottom: 1.8rem;
-  opacity: 0; animation: riseIn .7s .65s ease forwards;
-}
-.hero-body {
-  font-size: .97rem; line-height: 1.85; font-weight: 300;
-  color: rgba(240,232,213,.58); max-width: 370px;
-  margin-bottom: 3rem;
-  opacity: 0; animation: riseIn .8s .75s ease forwards;
-}
-.feat-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; max-width: 440px;
-  opacity: 0; animation: riseIn .8s .9s ease forwards;
-}
-.feat {
-  display: flex; align-items: flex-start; gap: .6rem;
-  padding: .75rem .9rem;
-  border: 1px solid rgba(196,146,58,0.12); border-radius: 10px;
-  background: rgba(196,146,58,0.03);
-  transition: all .3s;
-}
-.feat:hover { border-color: rgba(196,146,58,.32); background: rgba(196,146,58,.07); transform: translateY(-2px); }
-.fi { font-size: 1.05rem; flex-shrink: 0; margin-top: 2px; }
-.fl { font-size: .76rem; color: rgba(240,232,213,.6); line-height: 1.4; }
-
-/* Subtle background mandala */
-.mandala {
-  position: absolute; right: -2%; top: 50%;
-  transform: translateY(-50%);
-  font-size: 28rem; opacity: .018;
-  pointer-events: none; filter: blur(2px);
-  animation: mandalaSpin 90s linear infinite;
-}
-@keyframes mandalaSpin { to { transform: translateY(-50%) rotate(360deg); } }
-
-@keyframes riseIn {
-  from { opacity: 0; transform: translateY(22px); }
-  to { opacity: 1; transform: none; }
-}
-
-/* ── AUTH PANEL ── */
-.auth-wrap {
-  display: flex; align-items: center; justify-content: center;
-  padding: 2rem 4vw 2rem 1.5rem;
-}
-.auth-card {
-  width: 100%; max-width: 400px;
-  background: linear-gradient(160deg, rgba(42,28,12,.7) 0%, rgba(18,13,6,.8) 100%);
-  border: 1px solid var(--border);
-  border-radius: 28px;
-  padding: 2.6rem;
-  backdrop-filter: blur(28px);
-  box-shadow:
-    inset 0 1px 0 rgba(196,146,58,.18),
-    0 0 0 1px rgba(196,146,58,.06),
-    0 48px 96px -24px rgba(0,0,0,.8),
-    0 24px 48px -12px rgba(0,0,0,.5);
-  opacity: 0;
-  animation: cardUp 1s .65s cubic-bezier(.16,1,.3,1) forwards;
-}
-@keyframes cardUp {
-  from { opacity: 0; transform: translateY(36px) scale(.96); }
-  to { opacity: 1; transform: none; }
-}
-
-.card-header {
-  display: flex; align-items: center; gap: .6rem;
-  margin-bottom: 1.8rem;
-}
-.ch-icon { font-size: 1.5rem; }
-.ch-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.45rem; font-weight: 700; color: var(--amber); letter-spacing: .02em;
-}
-.ch-dot {
-  margin-left: auto;
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--sage);
-  box-shadow: 0 0 8px var(--sage);
-  animation: dotBlink 2s ease-in-out infinite;
-}
-@keyframes dotBlink { 0%,100%{opacity:1} 50%{opacity:.3} }
-
-.tabs {
-  display: flex;
-  background: rgba(0,0,0,.4);
-  border: 1px solid rgba(196,146,58,.13);
-  border-radius: 12px;
-  padding: 4px; gap: 3px;
-  margin-bottom: 1.8rem;
-}
-.tab {
-  flex: 1; padding: .52rem .5rem;
-  border: none; background: none; border-radius: 9px;
-  cursor: pointer;
-  font-family: 'Jost', sans-serif;
-  font-size: .82rem; font-weight: 500; letter-spacing: .05em;
-  color: rgba(240,232,213,.38); transition: all .3s;
-}
-.tab.active {
-  background: linear-gradient(135deg, var(--wheat), var(--amber));
-  color: var(--bark); font-weight: 600;
-  box-shadow: 0 4px 14px rgba(196,146,58,.35);
-}
-
-.field { margin-bottom: 1rem; }
-.field label {
-  display: block;
-  font-size: .66rem; font-weight: 500;
-  letter-spacing: .18em; text-transform: uppercase;
-  color: rgba(240,232,213,.38); margin-bottom: .42rem;
-}
-.field input {
-  width: 100%;
-  padding: .72rem 1rem;
-  background: rgba(0,0,0,.32);
-  border: 1px solid rgba(196,146,58,.17);
-  border-radius: 10px;
-  color: var(--cream);
-  font-family: 'Jost', sans-serif; font-size: .88rem; font-weight: 300;
-  outline: none; transition: all .25s;
-  caret-color: var(--amber);
-}
-.field input:focus {
-  border-color: rgba(196,146,58,.55);
-  background: rgba(0,0,0,.42);
-  box-shadow: 0 0 0 3px rgba(196,146,58,.1);
-}
-.field input::placeholder { color: rgba(240,232,213,.18); }
-
-.btn-auth {
-  width: 100%; margin-top: .4rem;
-  padding: .82rem 1rem;
-  background: linear-gradient(110deg, #a07030, #c4923a 50%, #d4a557);
-  background-size: 200% 100%; background-position: 100% 0;
-  border: none; border-radius: 12px;
-  color: #1a0f00;
-  font-family: 'Jost', sans-serif; font-size: .92rem; font-weight: 600; letter-spacing: .06em;
-  cursor: pointer; transition: all .4s ease;
-  position: relative; overflow: hidden;
-}
-.btn-auth::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,.15), transparent 60%);
-  opacity: 0; transition: opacity .3s;
-}
-.btn-auth:hover {
-  background-position: 0 0;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(196,146,58,.45);
-}
-.btn-auth:hover::after { opacity: 1; }
-.btn-auth:active { transform: none; }
-
-.msg {
-  display: none; margin-top: .9rem;
-  padding: .62rem .85rem;
-  border-radius: 9px; font-size: .8rem; line-height: 1.5;
-  text-align: center;
-  animation: msgPop .3s ease;
-}
-@keyframes msgPop { from{transform:scale(.96);opacity:0} to{transform:none;opacity:1} }
-.msg.error { background: rgba(200,60,60,.11); border: 1px solid rgba(200,60,60,.22); color: #ff9494; }
-.msg.success { background: rgba(80,160,80,.11); border: 1px solid rgba(80,160,80,.22); color: #8ddc8d; }
-
-.form-view { display: none; }
-.form-view.active { display: block; }
-
-.card-foot {
-  display: flex; align-items: center; gap: .5rem;
-  margin-top: 1.6rem; opacity: .25;
-}
-.cf-line { flex: 1; height: 1px; background: rgba(196,146,58,.5); }
-
-/* ── RESPONSIVE ── */
-@media (max-width: 860px) {
-  .stage { grid-template-columns: 1fr; }
-  .hero { padding: 3rem 2rem 2rem; align-items: center; text-align: center; }
-  .hero-body, .feat-grid { display: none; }
-  .mandala, .eyebrow-line { display: none; }
-  .auth-wrap { padding: 1.5rem 1.5rem 3rem; }
-}
-
-/* ── CURSOR ── */
-#crsr {
-  position: fixed; width: 8px; height: 8px;
-  background: var(--amber); border-radius: 50%;
-  pointer-events: none; z-index: 9999;
-  transform: translate(-50%,-50%);
-  transition: width .2s, height .2s, background .2s;
-  mix-blend-mode: difference;
-}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="/static/css/app.css">
 </head>
 <body>
 
+<div class="shell">
+
+  <!-- ══════════════ SIDEBAR ══════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <span class="sb-icon">🌾</span>
+      <span class="sb-name">KrishiAI</span>
+    </div>
+
+    <div class="sb-user">
+      <div class="su-avatar">{{ username[0]|upper }}</div>
+      <div class="su-info">
+        <div class="su-name">{{ username }}</div>
+        <div class="su-role">🌱 Farmer</div>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <button class="nav-item active" data-page="advisor" onclick="showPage('advisor')">
+        <span class="ni-icon">🌤️</span>
+        <span class="ni-label">Farming Advisor</span>
+      </button>
+      <button class="nav-item" data-page="disease" onclick="showPage('disease')">
+        <span class="ni-icon">🔬</span>
+        <span class="ni-label">Disease Detection</span>
+      </button>
+      <button class="nav-item" data-page="chat" onclick="showPage('chat')">
+        <span class="ni-icon">💬</span>
+        <span class="ni-label">AI Chatbot</span>
+      </button>
+      <button class="nav-item" data-page="history" onclick="showPage('history')">
+        <span class="ni-icon">📋</span>
+        <span class="ni-label">My History</span>
+      </button>
+    </nav>
+
+    <div class="sb-lang">
+      <label>🌐 Language</label>
+      <select id="globalLang" onchange="setLang(this.value)">
+        <option value="en">English</option>
+        <option value="kn">ಕನ್ನಡ (Kannada)</option>
+        <option value="hi">हिंदी (Hindi)</option>
+      </select>
+    </div>
+
+    <button class="sb-logout" onclick="doLogout()">← Logout</button>
+
+    <div class="sb-deco">🌿</div>
+  </aside>
+
+  <!-- ══════════════ MAIN ══════════════ -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div class="tb-title" id="pageTitle">Farming Advisor</div>
+      <div class="tb-right">
+        <span id="weatherBadge" class="wb"></span>
+      </div>
+    </header>
+
+    <!-- ════ PAGE: ADVISOR ════ -->
+    <div class="page active" id="page-advisor">
+      <div class="page-inner">
+
+        <div class="card">
+          <div class="card-label">🌱 Crop & Location</div>
+          <div class="two-col">
+            <div class="fld">
+              <label>Crop Name</label>
+              <div class="inp-row">
+                <input type="text" id="cropInput" placeholder="e.g. Rice, Wheat, Tomato…">
+                <button class="icon-btn mic-btn" title="Voice input" onclick="startVoice('cropInput')">🎤</button>
+              </div>
+            </div>
+            <div class="fld">
+              <label>Location</label>
+              <div class="inp-row">
+                <input type="text" id="locationInput" placeholder="City or auto-detect">
+                <button class="icon-btn" onclick="autoLocate()" title="Detect location">📍</button>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" id="adviceBtn" onclick="getAdvice()">
+            <span id="adviceBtn-text">✨ Get AI Advice</span>
+          </button>
+        </div>
+
+        <div class="card" id="weatherCard" style="display:none">
+          <div class="card-label">🌡️ Current Conditions</div>
+          <div id="weatherDisplay" class="weather-grid"></div>
+          <div class="chart-wrap">
+            <canvas id="weatherChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card" id="adviceCard" style="display:none">
+          <div class="advice-head">
+            <div class="card-label">🤖 AI Farming Advice</div>
+            <button class="speak-btn" onclick="speakAdvice()">🔊 Read Aloud</button>
+          </div>
+          <div class="advice-body" id="adviceText"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════ PAGE: DISEASE ════ -->
+    <div class="page" id="page-disease">
+      <div class="page-inner">
+
+        <div class="card">
+          <div class="card-label">🔬 Crop Disease Detection</div>
+          <div class="fld" style="margin-bottom:1rem">
+            <label>Crop Type (optional)</label>
+            <input type="text" id="diseaseCrop" placeholder="e.g. Tomato, Rice, Wheat">
+          </div>
+          <div class="upload-zone" id="uploadZone" onclick="document.getElementById('imageInput').click()">
+            <div class="uz-icon">📸</div>
+            <div class="uz-text">Tap to upload or drag &amp; drop a crop photo</div>
+            <div class="uz-sub">JPG · PNG · WEBP</div>
+            <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+          </div>
+          <img id="imagePreview" class="img-preview" style="display:none">
+          <button class="btn-primary" id="analyzeBtn" style="display:none;margin-top:1rem" onclick="analyzeImage()">
+            🧬 Analyse Disease
+          </button>
+        </div>
+
+        <div class="card" id="diseaseResult" style="display:none">
+          <div class="advice-head">
+            <div class="card-label">📊 Analysis Result</div>
+            <button class="speak-btn" onclick="speakEl('diseaseText')">🔊 Read Aloud</button>
+          </div>
+          <div class="advice-body" id="diseaseText"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════ PAGE: CHAT ════ -->
+    <div class="page" id="page-chat">
+      <div class="chat-shell">
+        <div class="chat-msgs" id="chatMessages">
+          <div class="chat-welcome">
+            <div class="cw-icon">🌾</div>
+            <div class="cw-title">Your Farming Assistant</div>
+            <div class="cw-sub">Ask anything about crops, soil, weather, or pests</div>
+            <div class="cw-chips">
+              <button onclick="quickChat('Best time to sow wheat?')">Best time to sow wheat?</button>
+              <button onclick="quickChat('How to improve soil fertility naturally?')">Improve soil fertility</button>
+              <button onclick="quickChat('Signs of nitrogen deficiency in rice?')">Nitrogen deficiency</button>
+              <button onclick="quickChat('How much water does tomato need per day?')">Tomato water needs</button>
+            </div>
+          </div>
+        </div>
+        <div class="chat-bar">
+          <button class="cb-mic" onclick="startVoice('chatInput')" title="Voice input">🎤</button>
+          <input type="text" id="chatInput" placeholder="Ask a farming question…" onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="cb-send" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: HISTORY ════ -->
+    <div class="page" id="page-history">
+      <div class="page-inner">
+        <div class="hist-head">
+          <div class="card-label" style="margin:0">📋 My Farming History</div>
+          <button class="btn-ghost" onclick="loadHistory()">↻ Refresh</button>
+        </div>
+        <div id="historyList" class="hist-list">
+          <div class="empty-state">Loading your history…</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- Cursor -->
 <div id="crsr"></div>
 
-<div class="world">
-  <div class="grain-layer"></div>
-  <div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div>
-  <div class="shaft"></div><div class="shaft"></div><div class="shaft"></div>
-  <span class="lf a">🌿</span><span class="lf b">🌾</span><span class="lf c">🍃</span>
-</div>
-
-<div class="stage">
-
-  <!-- LEFT -->
-  <div class="hero">
-    <div class="mandala">✿</div>
-    <div class="eyebrow">
-      <div class="eyebrow-line"></div>
-      <span class="eyebrow-txt">AI-Powered Agriculture Platform</span>
-    </div>
-    <h1 class="hero-title">Krishi<em>AI</em></h1>
-    <p class="hero-tagline">Where wisdom meets the soil</p>
-    <div class="divider"></div>
-    <p class="hero-body">
-      Real-time weather intelligence, AI-powered crop advice,
-      and disease detection — spoken in your language, rooted
-      in the wisdom of the land.
-    </p>
-    <div class="feat-grid">
-      <div class="feat"><span class="fi">🌦️</span><span class="fl">Live weather &amp; forecast charts</span></div>
-      <div class="feat"><span class="fi">🤖</span><span class="fl">AI farming advisor</span></div>
-      <div class="feat"><span class="fi">🔬</span><span class="fl">Crop disease image detection</span></div>
-      <div class="feat"><span class="fi">🌐</span><span class="fl">English · ಕನ್ನಡ · हिंदी</span></div>
-      <div class="feat"><span class="fi">🎤</span><span class="fl">Voice input &amp; text-to-speech</span></div>
-      <div class="feat"><span class="fi">📋</span><span class="fl">Personal history per farmer</span></div>
-    </div>
-  </div>
-
-  <!-- RIGHT -->
-  <div class="auth-wrap">
-    <div class="auth-card">
-      <div class="card-header">
-        <span class="ch-icon">🌱</span>
-        <span class="ch-name">Krishi AI</span>
-        <span class="ch-dot"></span>
-      </div>
-
-      <div class="tabs">
-        <button class="tab active" onclick="switchTab('login')">Sign In</button>
-        <button class="tab" onclick="switchTab('signup')">Register</button>
-      </div>
-
-      <div class="form-view active" id="loginForm">
-        <div class="field"><label>Username</label>
-          <input id="loginUser" type="text" placeholder="your_username" autocomplete="username"></div>
-        <div class="field"><label>Password</label>
-          <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
-        <button class="btn-auth" onclick="doLogin()">Enter the Field →</button>
-        <div class="msg" id="loginMsg"></div>
-      </div>
-
-      <div class="form-view" id="signupForm">
-        <div class="field"><label>Username</label>
-          <input id="signupUser" type="text" placeholder="choose_a_name" autocomplete="username"></div>
-        <div class="field"><label>Email</label>
-          <input id="signupEmail" type="email" placeholder="farmer@village.com"></div>
-        <div class="field"><label>Password</label>
-          <input id="signupPass" type="password" placeholder="••••••••" autocomplete="new-password"></div>
-        <button class="btn-auth" onclick="doSignup()">Create Account →</button>
-        <div class="msg" id="signupMsg"></div>
-      </div>
-
-      <div class="card-foot">
-        <div class="cf-line"></div><span style="font-size:.75rem">🌾 🌱 🍃</span><div class="cf-line"></div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<script>
-const crsr = document.getElementById('crsr');
-document.addEventListener('mousemove', e => {
-  crsr.style.left = e.clientX + 'px'; crsr.style.top = e.clientY + 'px';
-});
-document.querySelectorAll('button,input,a').forEach(el => {
-  el.addEventListener('mouseenter', () => { crsr.style.width='18px'; crsr.style.height='18px'; });
-  el.addEventListener('mouseleave', () => { crsr.style.width='8px'; crsr.style.height='8px'; });
-});
-
-function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach((t,i) =>
-    t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='signup')));
-  document.getElementById('loginForm').classList.toggle('active', tab==='login');
-  document.getElementById('signupForm').classList.toggle('active', tab==='signup');
-}
-function showMsg(id, text, type) {
-  const el = document.getElementById(id);
-  el.textContent = text; el.className=`msg ${type}`; el.style.display='block';
-  if (type==='success') setTimeout(()=>el.style.display='none', 3500);
-}
-async function doLogin() {
-  const u=document.getElementById('loginUser').value.trim(), p=document.getElementById('loginPass').value;
-  if(!u||!p){showMsg('loginMsg','Please fill in all fields.','error');return;}
-  const r=await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
-  const d=await r.json();
-  if(r.ok){window.location.reload();}else{showMsg('loginMsg',d.error,'error');}
-}
-async function doSignup() {
-  const u=document.getElementById('signupUser').value.trim(),
-        e=document.getElementById('signupEmail').value.trim(),
-        p=document.getElementById('signupPass').value;
-  if(!u||!e||!p){showMsg('signupMsg','All fields are required.','error');return;}
-  const r=await fetch('/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,email:e,password:p})});
-  const d=await r.json();
-  if(r.ok){showMsg('signupMsg','✓ Account created! Signing you in…','success');setTimeout(()=>window.location.reload(),1400);}
-  else{showMsg('signupMsg',d.error,'error');}
-}
-document.addEventListener('keydown', e => {
-  if(e.key==='Enter') document.querySelector('.form-view.active .btn-auth')?.click();
-});
-</script>
+<script src="/static/js/app.js"></script>
 </body>
 </html>
